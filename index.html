@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Image Compress</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font and basic body styling */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f4f8; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        /* Style for the main container */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff; /* White background for the card */
+            border-radius: 1rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem; /* Space between elements */
+        }
+        /* File input custom styling */
+        input[type="file"] {
+            display: none; /* Hide default input */
+        }
+        .custom-file-upload {
+            border: 2px dashed #93c5fd; /* Light blue dashed border */
+            background-color: #eff6ff; /* Very light blue background */
+            padding: 1.5rem 2.5rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            text-align: center;
+            color: #2563eb; /* Darker blue text */
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            width: 100%; /* Full width */
+        }
+        .custom-file-upload:hover {
+            background-color: #dbeafe; /* Slightly darker blue on hover */
+            border-color: #60a5fa; /* Darker blue border on hover */
+        }
+        /* Button styling */
+        .btn-compress {
+            background-color: #10b981; /* Green */
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3); /* Green shadow */
+        }
+        .btn-compress:hover {
+            background-color: #059669; /* Darker green on hover */
+            transform: translateY(-2px); /* Slight lift effect */
+        }
+        .btn-compress:active {
+            transform: translateY(0); /* Return to original position on click */
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Download link styling */
+        .download-link {
+            display: inline-block;
+            background-color: #3b82f6; /* Blue */
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); /* Blue shadow */
+        }
+        .download-link:hover {
+            background-color: #2563eb; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+        .download-link:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Message box for alerts */
+        .message-box {
+            background-color: #fef3c7; /* Light yellow */
+            color: #d97706; /* Dark yellow text */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #fcd34d;
+            margin-top: 1rem;
+            text-align: center;
+            display: none; /* Hidden by default */
+            width: 100%;
+        }
+
+        /* Canvas styling */
+        #outputCanvas {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            max-width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            display: block; /* Ensure it's not inline */
+            margin: 0 auto; /* Center the canvas */
+        }
+
+        /* Google Ads container styling - now just for general auto-ads message */
+        .google-ads-container {
+            width: 100%;
+            max-width: 728px; /* Common leaderboard ad size for visual context */
+            min-height: 90px; /* Minimum height, actual ad size will vary */
+            background-color: #e0e7ff; /* Light blue placeholder */
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #4338ca; /* Dark blue text */
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 1.5rem;
+            border: 1px solid #a5b4fc;
+            flex-direction: column; /* Allow content to stack */
+            padding: 1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+            }
+            .custom-file-upload {
+                padding: 1rem 1.5rem;
+            }
+            .btn-compress, .download-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+    <!-- Google AdSense Auto Ads Script (place in head) -->
+    <!-- Replace 'ca-pub-YOUR_ADSENSE_PUBLISHER_ID' with your actual publisher ID -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_PUBLISHER_ID"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-4">Easy Image Compress</h1>
+        <p class="text-gray-600 text-center mb-6">Upload an image to compress it directly in your browser!</p>
+        <p class="text-gray-500 text-sm mb-4">Supported image types: JPEG, PNG, GIF, BMP, WebP, TIFF</p>
+
+        <!-- File Input -->
+        <input type="file" id="imageInput" accept="image/*" class="hidden" />
+        <label for="imageInput" class="custom-file-upload">
+            Click to select an image or drag and drop here
+        </label>
+
+        <!-- Compression Quality Slider -->
+        <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <label for="qualitySlider" class="text-gray-700 font-medium whitespace-nowrap">Compression Quality:</label>
+            <input type="range" id="qualitySlider" min="10" max="100" value="70" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg dark:bg-gray-700">
+            <span id="qualityValue" class="text-gray-800 font-bold ml-2 w-12 text-right">70%</span>
+        </div>
+
+        <!-- Compression Button -->
+        <button id="compressButton" class="btn-compress w-full sm:w-auto" disabled>
+            Compress Image
+        </button>
+
+        <!-- Message Box for user feedback -->
+        <div id="messageBox" class="message-box"></div>
+
+        <!-- Canvas for image processing -->
+        <canvas id="outputCanvas" class="hidden"></canvas>
+
+        <!-- Download Link -->
+        <a id="downloadLink" class="download-link hidden" download="compressed_image.jpg">
+            Download Compressed Image
+        </a>
+
+        <!-- Google Ads Auto-Ads Informational Placeholder -->
+        <div class="google-ads-container">
+            <p class="font-bold mb-1">Google AdSense Auto Ads Active</p>
+            <p class="text-sm">Ads will be automatically placed by Google AdSense once your site is approved and crawled.</p>
+            <p class="text-xs mt-2">Remember to replace `ca-pub-YOUR_ADSENSE_PUBLISHER_ID` in the `head` section with your actual publisher ID.</p>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const imageInput = document.getElementById('imageInput');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const compressButton = document.getElementById('compressButton');
+        const outputCanvas = document.getElementById('outputCanvas');
+        const downloadLink = document.getElementById('downloadLink');
+        const messageBox = document.getElementById('messageBox');
+        const ctx = outputCanvas.getContext('2d');
+
+        let originalImage = null; // Store the original image object
+
+        // Function to show a message in the message box
+        function showMessage(message, type = 'warning') {
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            messageBox.className = 'message-box'; // Reset classes
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
+            } else { // default warning
+                messageBox.classList.add('bg-yellow-100', 'text-yellow-800', 'border-yellow-400');
+            }
+            // Hide after 5 seconds
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Event listener for image input change
+        imageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                // Check if the file is an image
+                if (!file.type.startsWith('image/')) {
+                    // Updated message to be more generic, as the list on the page provides specifics
+                    showMessage('Please select a valid image file.', 'error');
+                    imageInput.value = ''; // Clear the input
+                    compressButton.disabled = true;
+                    downloadLink.classList.add('hidden');
+                    outputCanvas.classList.add('hidden');
+                    return;
+                }
+
+                showMessage('Image selected! Adjust quality and click Compress.', 'success');
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        originalImage = img; // Store the original image
+                        // Make canvas visible and ready for drawing
+                        outputCanvas.classList.remove('hidden');
+                        compressButton.disabled = false; // Enable compress button
+                        downloadLink.classList.add('hidden'); // Hide download link until compressed
+                        // Optional: Display original image on canvas or just use it internally
+                        // For simplicity, we'll draw it when compress is clicked.
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                originalImage = null;
+                compressButton.disabled = true;
+                downloadLink.classList.add('hidden');
+                outputCanvas.classList.add('hidden');
+                showMessage('No image selected.', 'warning');
+            }
+        });
+
+        // Event listener for quality slider change
+        qualitySlider.addEventListener('input', (event) => {
+            qualityValue.textContent = `${event.target.value}%`;
+            // If an image is loaded, re-compress immediately for live preview (optional, can be performance intensive for large images)
+            // For this simple example, we'll wait for the compress button click.
+        });
+
+        // Event listener for compress button click
+        compressButton.addEventListener('click', () => {
+            if (!originalImage) {
+                showMessage('Please select an image first.', 'error');
+                return;
+            }
+
+            showMessage('Compressing image...', 'warning');
+            compressButton.disabled = true; // Disable button during compression
+
+            // Set canvas dimensions to the original image dimensions
+            outputCanvas.width = originalImage.width;
+            outputCanvas.height = originalImage.height;
+
+            // Draw the image onto the canvas
+            ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height); // Clear previous drawing
+            ctx.drawImage(originalImage, 0, 0, originalImage.width, originalImage.height);
+
+            // Get the compression quality from the slider (0.1 to 1.0)
+            const quality = parseFloat(qualitySlider.value) / 100;
+
+            // Get the image data URL with specified quality
+            // The image type 'image/jpeg' allows quality control.
+            // For PNG, quality parameter is ignored as it's lossless (though you can reduce color depth etc.)
+            const compressedImageDataUrl = outputCanvas.toDataURL('image/jpeg', quality);
+
+            // Update the download link
+            downloadLink.href = compressedImageDataUrl;
+            downloadLink.download = `compressed_image_${qualitySlider.value}q.jpg`; // Suggest a filename
+            downloadLink.classList.remove('hidden'); // Make download link visible
+
+            compressButton.disabled = false; // Re-enable button
+            showMessage('Image compressed successfully! Click download to save.', 'success');
+        });
+
+        // Drag and drop functionality for the custom file upload area
+        const customFileUpload = document.querySelector('.custom-file-upload');
+
+        customFileUpload.addEventListener('dragover', (event) => {
+            event.preventDefault(); // Prevent default to allow drop
+            customFileUpload.classList.add('border-blue-700', 'bg-blue-50'); // Visual feedback
+        });
+
+        customFileUpload.addEventListener('dragleave', () => {
+            customFileUpload.classList.remove('border-blue-700', 'bg-blue-50');
+        });
+
+        customFileUpload.addEventListener('drop', (event) => {
+            event.preventDefault(); // Prevent default browser file open
+            customFileUpload.classList.remove('border-blue-700', 'bg-blue-50');
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                // Assign files to the hidden input element to trigger its change event
+                imageInput.files = files;
+                // Manually dispatch the change event since we programmatically set files
+                const changeEvent = new Event('change', { bubbles: true });
+                imageInput.dispatchEvent(changeEvent);
+            }
+        });
+
+        // Initial state: disable button and hide canvas/link
+        compressButton.disabled = true;
+        downloadLink.classList.add('hidden');
+        outputCanvas.classList.add('hidden');
+        qualityValue.textContent = `${qualitySlider.value}%`; // Set initial quality display
+    </script>
+</body>
+</html>
